@@ -755,17 +755,21 @@ function drawDipperMethod(c, rect) {
 
 function drawCassiopeiaMethod(c, rect) {
   const stars = [
-    { x: rect.width * .18, y: rect.height * .43, name: "仙后一" },
-    { x: rect.width * .30, y: rect.height * .30, name: "仙后二" },
-    { x: rect.width * .43, y: rect.height * .50, name: "中間星" },
-    { x: rect.width * .57, y: rect.height * .31, name: "仙后四" },
-    { x: rect.width * .71, y: rect.height * .44, name: "仙后五" }
+    { x: rect.width * .20, y: rect.height * .55, name: "仙后一" },
+    { x: rect.width * .36, y: rect.height * .46, name: "仙后二" },
+    { x: rect.width * .52, y: rect.height * .46, name: "中間星" },
+    { x: rect.width * .64, y: rect.height * .46, name: "仙后四" },
+    { x: rect.width * .80, y: rect.height * .55, name: "仙后五" }
   ];
   const leftIntersectionLine = [stars[0], stars[1]];
   const rightIntersectionLine = [stars[4], stars[3]];
   const intersection = lineIntersection(leftIntersectionLine[0], leftIntersectionLine[1], rightIntersectionLine[0], rightIntersectionLine[1]);
   const middle = stars[2];
-  const polaris = { x: rect.width * .49, y: rect.height * .84, name: "北極星" };
+  const polaris = {
+    x: middle.x + (middle.x - intersection.x) * 5,
+    y: middle.y + (middle.y - intersection.y) * 5,
+    name: "北極星"
+  };
   stars.slice(0, -1).forEach((star, index) => drawLine(c, star, stars[index + 1]));
   stars.forEach((star, index) => drawNamedStar(c, star.x, star.y, state.polarisStep === 0 && index === 2 ? "仙后座 W" : "", "#f4f8ff", index === 2 ? 5 : 4));
   if (state.polarisStep >= 1) {
@@ -794,14 +798,14 @@ function drawCassiopeiaMethod(c, rect) {
     c.setLineDash([8, 6]);
     c.beginPath();
     c.moveTo(intersection.x, intersection.y);
-    c.lineTo(middle.x, middle.y);
     c.lineTo(polaris.x, polaris.y);
     c.stroke();
     c.setLineDash([]);
+    drawDistanceMarks(c, middle, polaris, 5);
     drawNamedStar(c, middle.x, middle.y, "中間星", "#f6d36b", 6);
     c.fillStyle = "#f6d36b";
     c.font = "800 14px 'Microsoft JhengHei', sans-serif";
-    c.fillText("交會點 → 中間星，再延長", rect.width * .44, rect.height * .66);
+    c.fillText("交會點 → 中間星，再延長 5 倍", rect.width * .42, rect.height * .69);
     c.restore();
   }
   if (state.polarisStep >= 3) {
