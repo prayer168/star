@@ -138,31 +138,44 @@
           <h2>四季星空怎麼看？</h2>
           <p>同一時間的夜晚，不同季節容易看見的代表星座不同。先抓住每季的「起點星座」，再往旁邊延伸尋找其他亮星。</p>
           <div class="season-guide" aria-label="四季星空代表星座">
-            <div>
+            <button class="season-guide-card is-active" type="button" data-season-jump="spring">
               <strong>春</strong>
               <span>北斗七星、大角星、角宿一</span>
               <small>從北斗斗柄延伸出春季大曲線。</small>
-            </div>
-            <div>
+            </button>
+            <button class="season-guide-card" type="button" data-season-jump="summer">
               <strong>夏</strong>
               <span>織女星、牛郎星、天津四</span>
               <small>先找夏季大三角，再找天琴、天鷹、天鵝。</small>
-            </div>
-            <div>
+            </button>
+            <button class="season-guide-card" type="button" data-season-jump="autumn">
               <strong>秋</strong>
               <span>飛馬座四邊形、仙后座、仙女座</span>
               <small>用大方框和 W 形建立秋季星空骨架。</small>
-            </div>
-            <div>
+            </button>
+            <button class="season-guide-card" type="button" data-season-jump="winter">
               <strong>冬</strong>
               <span>獵戶座、天狼星、金牛座</span>
               <small>先找獵戶座三顆腰帶星，再延伸到冬季亮星。</small>
-            </div>
+            </button>
           </div>
+          <p class="interactive-note" id="season-guide-feedback" aria-live="polite">目前選擇春季：回到星圖可從北斗七星開始，沿斗柄尋找大角星與角宿一。</p>
         </article>
         <article class="concept-card wide-card">
           <h2>春夏、秋冬如何尋找北極星？</h2>
           <p>北極星接近北天極，能幫助判斷北方。不同季節可用不同的星座當「指路標」。</p>
+          <div class="polaris-interactive">
+            <div class="polaris-controls" role="group" aria-label="選擇尋找北極星方法">
+              <button class="method-btn is-active" type="button" data-method="dipper">春夏：北斗七星</button>
+              <button class="method-btn" type="button" data-method="cassiopeia">秋冬：仙后座</button>
+            </div>
+            <canvas class="mini-canvas polaris-canvas" id="polaris-canvas" width="720" height="300" aria-label="尋找北極星互動圖"></canvas>
+            <div class="step-controls">
+              <button class="text-button secondary-button" id="polaris-prev" type="button">上一步</button>
+              <p id="polaris-step-text" aria-live="polite">第 1 步：先找到像斗杓的北斗七星。</p>
+              <button class="text-button" id="polaris-next" type="button">下一步</button>
+            </div>
+          </div>
           <div class="polaris-methods" aria-label="尋找北極星的方法">
             <section>
               <h3>春夏：用北斗七星</h3>

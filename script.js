@@ -10,6 +10,33 @@ const toggleLinesButton = document.querySelector("#toggle-lines");
 const resetButton = document.querySelector("#reset-view");
 const trailCanvas = document.querySelector("#trail-canvas");
 const atmosphereCanvas = document.querySelector("#atmosphere-canvas");
+const polarisCanvas = document.querySelector("#polaris-canvas");
+const seasonGuideFeedback = document.querySelector("#season-guide-feedback");
+const polarisStepText = document.querySelector("#polaris-step-text");
+const polarisPrevButton = document.querySelector("#polaris-prev");
+const polarisNextButton = document.querySelector("#polaris-next");
+
+const seasonGuideText = {
+  spring: "目前選擇春季：回到星圖可從北斗七星開始，沿斗柄尋找大角星與角宿一。",
+  summer: "目前選擇夏季：回到星圖可先找夏季大三角，再用織女星、牛郎星、天津四建立方位感。",
+  autumn: "目前選擇秋季：回到星圖可先找飛馬座四邊形，再找仙后座與仙女座。",
+  winter: "目前選擇冬季：回到星圖可先找獵戶座腰帶，再延伸到天狼星、畢宿五與金牛座。"
+};
+
+const polarisSteps = {
+  dipper: [
+    "第 1 步：先找到像斗杓的北斗七星。",
+    "第 2 步：找斗口外側兩顆星：天樞與天璇。",
+    "第 3 步：沿著天璇往天樞的方向延長約 5 倍距離。",
+    "第 4 步：延長線附近那顆位置穩定的星，就是北極星。"
+  ],
+  cassiopeia: [
+    "第 1 步：先找到像 W 或 M 的仙后座。",
+    "第 2 步：找到 W 中間較深的尖角。",
+    "第 3 步：從尖角朝開口外側想像一支箭。",
+    "第 4 步：箭頭指向北極星附近，可用來判斷北方。"
+  ]
+};
 
 const seasons = {
   spring: {
@@ -212,7 +239,9 @@ let state = {
   score: 0,
   answered: false,
   showPolaris: false,
-  lastTick: 0
+  lastTick: 0,
+  polarisMethod: "dipper",
+  polarisStep: 0
 };
 
 let skyAnimationFrame = 0;
@@ -472,6 +501,7 @@ function setSeason(seasonId) {
   const season = seasons[seasonId];
   infoBox.innerHTML = `<h2>${season.title}</h2><p>${season.intro}</p>`;
   renderConstellationList();
+  updateSeasonGuide(seasonId);
   drawSky();
 }
 
@@ -553,6 +583,7 @@ function nextQuestion() {
 function drawMiniAnimations(time = 0) {
   drawTrailCanvas(time);
   drawAtmosphereCanvas(time);
+  drawPolarisCanvas();
   miniAnimationFrame = requestAnimationFrame(drawMiniAnimations);
 }
 
@@ -617,6 +648,156 @@ function drawAtmosphereCanvas(time) {
   c.fillText("低空路徑穿過較厚大氣", rect.width * 0.33, rect.height * 0.36);
 }
 
+function drawPolarisCanvas() {
+  if (!polarisCanvas) return;
+  const { ctx: c, rect } = setupMiniCanvas(polarisCanvas);
+  c.clearRect(0, 0, rect.width, rect.height);
+  const gradient = c.createLinearGradient(0, 0, 0, rect.height);
+  gradient.addColorStop(0, "#091425");
+  gradient.addColorStop(1, "#1e4253");
+  c.fillStyle = gradient;
+  c.fillRect(0, 0, rect.width, rect.height);
+  drawSmallSkyDots(c, rect);
+
+  if (state.polarisMethod === "dipper") {
+    drawDipperMethod(c, rect);
+  } else {
+    drawCassiopeiaMethod(c, rect);
+  }
+}
+
+function drawSmallSkyDots(c, rect) {
+  c.save();
+  c.fillStyle = "rgba(255,255,255,.42)";
+  for (let i = 0; i < 34; i++) {
+    const x = ((i * 83) % 997) / 997 * rect.width;
+    const y = ((i * 151) % 661) / 661 * rect.height;
+    c.beginPath();
+    c.arc(x, y, 0.8 + (i % 2) * 0.5, 0, Math.PI * 2);
+    c.fill();
+  }
+  c.restore();
+}
+
+function drawNamedStar(c, x, y, label, color = "#f4f8ff", radius = 4) {
+  c.save();
+  c.fillStyle = color;
+  c.shadowColor = color;
+  c.shadowBlur = 14;
+  c.beginPath();
+  c.arc(x, y, radius, 0, Math.PI * 2);
+  c.fill();
+  c.shadowBlur = 0;
+  c.fillStyle = "rgba(255,255,255,.94)";
+  c.font = "700 13px 'Microsoft JhengHei', sans-serif";
+  c.fillText(label, x + radius + 6, y - radius - 2);
+  c.restore();
+}
+
+function drawLine(c, a, b, color = "rgba(220,235,246,.55)", width = 2) {
+  c.save();
+  c.strokeStyle = color;
+  c.lineWidth = width;
+  c.beginPath();
+  c.moveTo(a.x, a.y);
+  c.lineTo(b.x, b.y);
+  c.stroke();
+  c.restore();
+}
+
+function drawDipperMethod(c, rect) {
+  const stars = [
+    { x: rect.width * .17, y: rect.height * .48, name: "天樞" },
+    { x: rect.width * .25, y: rect.height * .39, name: "天璇" },
+    { x: rect.width * .35, y: rect.height * .43, name: "天璣" },
+    { x: rect.width * .43, y: rect.height * .52, name: "天權" },
+    { x: rect.width * .54, y: rect.height * .48, name: "玉衡" },
+    { x: rect.width * .64, y: rect.height * .56, name: "開陽" },
+    { x: rect.width * .74, y: rect.height * .58, name: "搖光" }
+  ];
+  const polaris = { x: rect.width * .22, y: rect.height * .13, name: "北極星" };
+  stars.slice(0, -1).forEach((star, index) => drawLine(c, star, stars[index + 1]));
+  stars.forEach((star, index) => {
+    if (state.polarisStep === 0 || index <= 1 || state.polarisStep > 0) {
+      drawNamedStar(c, star.x, star.y, state.polarisStep > 0 && index < 2 ? star.name : "", "#f4f8ff", index < 2 ? 5 : 4);
+    }
+  });
+  if (state.polarisStep >= 1) {
+    drawLine(c, stars[1], stars[0], "#f6d36b", 3);
+  }
+  if (state.polarisStep >= 2) {
+    c.save();
+    c.setLineDash([8, 6]);
+    drawLine(c, stars[0], polaris, "#f6d36b", 3);
+    c.restore();
+    c.fillStyle = "#f6d36b";
+    c.font = "800 14px 'Microsoft JhengHei', sans-serif";
+    c.fillText("延長約 5 倍", rect.width * .08, rect.height * .28);
+  }
+  if (state.polarisStep >= 3) {
+    drawNamedStar(c, polaris.x, polaris.y, polaris.name, "#f6d36b", 5);
+  }
+}
+
+function drawCassiopeiaMethod(c, rect) {
+  const stars = [
+    { x: rect.width * .18, y: rect.height * .35 },
+    { x: rect.width * .30, y: rect.height * .24 },
+    { x: rect.width * .42, y: rect.height * .45 },
+    { x: rect.width * .56, y: rect.height * .27 },
+    { x: rect.width * .70, y: rect.height * .39 }
+  ];
+  const polaris = { x: rect.width * .47, y: rect.height * .78, name: "北極星" };
+  stars.slice(0, -1).forEach((star, index) => drawLine(c, star, stars[index + 1]));
+  stars.forEach((star, index) => drawNamedStar(c, star.x, star.y, state.polarisStep === 0 && index === 2 ? "仙后座 W" : "", "#f4f8ff", index === 2 ? 5 : 4));
+  if (state.polarisStep >= 1) {
+    drawNamedStar(c, stars[2].x, stars[2].y, "中間尖角", "#f6d36b", 6);
+  }
+  if (state.polarisStep >= 2) {
+    c.save();
+    c.strokeStyle = "#f6d36b";
+    c.lineWidth = 3;
+    c.setLineDash([8, 6]);
+    c.beginPath();
+    c.moveTo(stars[2].x, stars[2].y);
+    c.lineTo(polaris.x, polaris.y);
+    c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = "#f6d36b";
+    c.beginPath();
+    c.moveTo(polaris.x, polaris.y);
+    c.lineTo(polaris.x - 7, polaris.y - 17);
+    c.lineTo(polaris.x + 10, polaris.y - 12);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
+  if (state.polarisStep >= 3) {
+    drawNamedStar(c, polaris.x, polaris.y, polaris.name, "#f6d36b", 5);
+  }
+}
+
+function updatePolarisStep() {
+  const steps = polarisSteps[state.polarisMethod];
+  state.polarisStep = Math.max(0, Math.min(state.polarisStep, steps.length - 1));
+  polarisStepText.textContent = steps[state.polarisStep];
+  polarisPrevButton.disabled = state.polarisStep === 0;
+  polarisNextButton.disabled = state.polarisStep === steps.length - 1;
+  document.querySelectorAll(".method-btn").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.method === state.polarisMethod);
+  });
+  drawPolarisCanvas();
+}
+
+function updateSeasonGuide(seasonId) {
+  document.querySelectorAll(".season-guide-card").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.seasonJump === seasonId);
+  });
+  if (seasonGuideFeedback) {
+    seasonGuideFeedback.textContent = seasonGuideText[seasonId];
+  }
+}
+
 function tickSky(timestamp) {
   if (!state.lastTick) state.lastTick = timestamp;
   const elapsed = timestamp - state.lastTick;
@@ -641,6 +822,14 @@ document.querySelectorAll(".nav-tab").forEach((button) => {
 
 document.querySelectorAll(".season-btn").forEach(button => {
   button.addEventListener("click", () => setSeason(button.dataset.season));
+});
+
+document.querySelectorAll(".season-guide-card").forEach(button => {
+  button.addEventListener("click", () => {
+    const seasonId = button.dataset.seasonJump;
+    setSeason(seasonId);
+    document.querySelector('[data-target="explore"]').click();
+  });
 });
 
 timeRange.addEventListener("input", () => {
@@ -695,6 +884,24 @@ function showPolarisOnSky() {
 document.querySelector("#show-polaris").addEventListener("click", showPolarisOnSky);
 document.querySelector("#show-polaris-from-methods").addEventListener("click", showPolarisOnSky);
 
+document.querySelectorAll(".method-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    state.polarisMethod = button.dataset.method;
+    state.polarisStep = 0;
+    updatePolarisStep();
+  });
+});
+
+polarisPrevButton.addEventListener("click", () => {
+  state.polarisStep -= 1;
+  updatePolarisStep();
+});
+
+polarisNextButton.addEventListener("click", () => {
+  state.polarisStep += 1;
+  updatePolarisStep();
+});
+
 document.querySelector("#play-motion").addEventListener("click", () => {
   document.querySelector('[data-target="explore"]').click();
   animateSkyInput.checked = true;
@@ -706,9 +913,11 @@ window.addEventListener("resize", () => {
   resizeCanvas();
   drawTrailCanvas(performance.now());
   drawAtmosphereCanvas(performance.now());
+  drawPolarisCanvas();
 });
 
 setSeason("spring");
+updatePolarisStep();
 renderQuiz();
 resizeCanvas();
 skyAnimationFrame = requestAnimationFrame(tickSky);
