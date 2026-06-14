@@ -360,6 +360,12 @@ input[type="range"] {
   flex-wrap: wrap;
   margin-bottom: 12px;
 }
+.demo-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
 .method-btn {
   min-height: 42px;
   padding: 8px 12px;
@@ -688,6 +694,6 @@ button:focus-visible, input:focus-visible {
   .icon-button { flex: 0 0 42px; }
   .constellation-list, .concept-grid, .story-grid, .season-guide, .polaris-methods { grid-template-columns: 1fr; }
   .step-controls { grid-template-columns: 1fr; }
-  .polaris-controls { display: grid; }
+  .polaris-controls, .demo-controls { display: grid; }
   h1 { font-size: 25px; }
 }

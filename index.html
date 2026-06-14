@@ -191,12 +191,17 @@
               <button class="method-btn is-active" type="button" data-method="dipper">春夏：北斗七星</button>
               <button class="method-btn" type="button" data-method="cassiopeia">秋冬：仙后座</button>
             </div>
+            <div class="demo-controls" role="group" aria-label="操作或自動演示">
+              <button class="text-button secondary-button" id="polaris-reset" type="button">重設操作</button>
+              <button class="text-button" id="polaris-auto" type="button">自動演示</button>
+            </div>
             <canvas class="mini-canvas polaris-canvas" id="polaris-canvas" width="720" height="300" aria-label="尋找北極星互動圖"></canvas>
             <div class="step-controls">
               <button class="text-button secondary-button" id="polaris-prev" type="button">上一步</button>
               <p id="polaris-step-text" aria-live="polite">第 1 步：先找到像斗杓的北斗七星。</p>
               <button class="text-button" id="polaris-next" type="button">下一步</button>
             </div>
+            <p class="interactive-note">操作方式：可手動按上一步/下一步，也可按自動演示。圖中的延長距離為教學壓縮示意，方向與步驟依天文資料校正。</p>
           </div>
           <div class="polaris-methods" aria-label="尋找北極星的方法">
             <section>
@@ -204,7 +209,7 @@
               <ol>
                 <li>先找到像斗杓的北斗七星。</li>
                 <li>找斗口外側兩顆星：天樞與天璇。</li>
-                <li>沿著天璇往天樞的方向延長約 5 倍距離。</li>
+                <li>由天璇往天樞方向延長約 5 倍距離。</li>
                 <li>附近那顆不算最亮、但位置穩定的星，就是北極星。</li>
               </ol>
             </section>
@@ -212,8 +217,8 @@
               <h3>秋冬：用仙后座</h3>
               <ol>
                 <li>先找到像 W 或 M 的仙后座。</li>
-                <li>用 W 中間的尖角想像一支箭，朝開口外側延伸。</li>
-                <li>往北方天空尋找一顆位置穩定、附近星較少的星。</li>
+                <li>將 W 兩側邊向後延伸，找出兩線的交會點。</li>
+                <li>把交會點與 W 中間星連成一線，並沿著中間星方向延長約 5 倍。</li>
                 <li>若北斗七星位置較低不明顯，仙后座就是很好的替代指標。</li>
               </ol>
             </section>

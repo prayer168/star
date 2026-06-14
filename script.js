@@ -15,6 +15,8 @@ const seasonGuideFeedback = document.querySelector("#season-guide-feedback");
 const polarisStepText = document.querySelector("#polaris-step-text");
 const polarisPrevButton = document.querySelector("#polaris-prev");
 const polarisNextButton = document.querySelector("#polaris-next");
+const polarisResetButton = document.querySelector("#polaris-reset");
+const polarisAutoButton = document.querySelector("#polaris-auto");
 
 const seasonGuideText = {
   spring: "目前選擇春季：回到星圖可從北斗七星開始，沿斗柄尋找大角星與角宿一。",
@@ -26,15 +28,15 @@ const seasonGuideText = {
 const polarisSteps = {
   dipper: [
     "第 1 步：先找到像斗杓的北斗七星。",
-    "第 2 步：找斗口外側兩顆星：天樞與天璇。",
-    "第 3 步：沿著天璇往天樞的方向延長約 5 倍距離。",
+    "第 2 步：找斗口外側兩顆星：天璇與天樞。",
+    "第 3 步：由天璇往天樞方向延長約 5 倍距離。",
     "第 4 步：延長線附近那顆位置穩定的星，就是北極星。"
   ],
   cassiopeia: [
     "第 1 步：先找到像 W 或 M 的仙后座。",
-    "第 2 步：找到 W 中間較深的尖角。",
-    "第 3 步：從尖角朝開口外側想像一支箭。",
-    "第 4 步：箭頭指向北極星附近，可用來判斷北方。"
+    "第 2 步：將 W 兩側邊向後延伸，找出兩線的交會點。",
+    "第 3 步：把交會點與 W 中間星連成一線，沿中間星方向延長約 5 倍。",
+    "第 4 步：延長線附近那顆位置穩定的星，就是北極星。"
   ]
 };
 
@@ -246,6 +248,7 @@ let state = {
 
 let skyAnimationFrame = 0;
 let miniAnimationFrame = 0;
+let polarisAutoTimer = 0;
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
@@ -707,32 +710,43 @@ function drawLine(c, a, b, color = "rgba(220,235,246,.55)", width = 2) {
 
 function drawDipperMethod(c, rect) {
   const stars = [
-    { x: rect.width * .17, y: rect.height * .48, name: "天樞" },
-    { x: rect.width * .25, y: rect.height * .39, name: "天璇" },
-    { x: rect.width * .35, y: rect.height * .43, name: "天璣" },
-    { x: rect.width * .43, y: rect.height * .52, name: "天權" },
-    { x: rect.width * .54, y: rect.height * .48, name: "玉衡" },
-    { x: rect.width * .64, y: rect.height * .56, name: "開陽" },
-    { x: rect.width * .74, y: rect.height * .58, name: "搖光" }
+    { x: rect.width * .35, y: rect.height * .40, name: "天樞" },
+    { x: rect.width * .37, y: rect.height * .46, name: "天璇" },
+    { x: rect.width * .49, y: rect.height * .47, name: "天璣" },
+    { x: rect.width * .52, y: rect.height * .38, name: "天權" },
+    { x: rect.width * .63, y: rect.height * .34, name: "玉衡" },
+    { x: rect.width * .72, y: rect.height * .39, name: "開陽" },
+    { x: rect.width * .82, y: rect.height * .37, name: "搖光" }
   ];
-  const polaris = { x: rect.width * .22, y: rect.height * .13, name: "北極星" };
+  const dubhe = stars[0];
+  const merak = stars[1];
+  const polaris = {
+    x: dubhe.x + (dubhe.x - merak.x) * 5,
+    y: dubhe.y + (dubhe.y - merak.y) * 5,
+    name: "北極星"
+  };
   stars.slice(0, -1).forEach((star, index) => drawLine(c, star, stars[index + 1]));
   stars.forEach((star, index) => {
-    if (state.polarisStep === 0 || index <= 1 || state.polarisStep > 0) {
-      drawNamedStar(c, star.x, star.y, state.polarisStep > 0 && index < 2 ? star.name : "", "#f4f8ff", index < 2 ? 5 : 4);
-    }
+    drawNamedStar(c, star.x, star.y, state.polarisStep > 0 && index < 2 ? star.name : "", "#f4f8ff", index < 2 ? 5 : 4);
   });
   if (state.polarisStep >= 1) {
-    drawLine(c, stars[1], stars[0], "#f6d36b", 3);
+    drawLine(c, merak, dubhe, "#f6d36b", 3);
   }
   if (state.polarisStep >= 2) {
     c.save();
+    c.strokeStyle = "#f6d36b";
+    c.lineWidth = 3;
     c.setLineDash([8, 6]);
-    drawLine(c, stars[0], polaris, "#f6d36b", 3);
+    c.beginPath();
+    c.moveTo(merak.x, merak.y);
+    c.lineTo(polaris.x, polaris.y);
+    c.stroke();
+    c.setLineDash([]);
+    drawDistanceMarks(c, dubhe, polaris, 5);
     c.restore();
     c.fillStyle = "#f6d36b";
     c.font = "800 14px 'Microsoft JhengHei', sans-serif";
-    c.fillText("延長約 5 倍", rect.width * .08, rect.height * .28);
+    c.fillText("天璇 → 天樞，再延長約 5 倍", rect.width * .08, rect.height * .24);
   }
   if (state.polarisStep >= 3) {
     drawNamedStar(c, polaris.x, polaris.y, polaris.name, "#f6d36b", 5);
@@ -741,17 +755,37 @@ function drawDipperMethod(c, rect) {
 
 function drawCassiopeiaMethod(c, rect) {
   const stars = [
-    { x: rect.width * .18, y: rect.height * .35 },
-    { x: rect.width * .30, y: rect.height * .24 },
-    { x: rect.width * .42, y: rect.height * .45 },
-    { x: rect.width * .56, y: rect.height * .27 },
-    { x: rect.width * .70, y: rect.height * .39 }
+    { x: rect.width * .18, y: rect.height * .43, name: "仙后一" },
+    { x: rect.width * .30, y: rect.height * .30, name: "仙后二" },
+    { x: rect.width * .43, y: rect.height * .50, name: "中間星" },
+    { x: rect.width * .57, y: rect.height * .31, name: "仙后四" },
+    { x: rect.width * .71, y: rect.height * .44, name: "仙后五" }
   ];
-  const polaris = { x: rect.width * .47, y: rect.height * .78, name: "北極星" };
+  const leftIntersectionLine = [stars[0], stars[1]];
+  const rightIntersectionLine = [stars[4], stars[3]];
+  const intersection = lineIntersection(leftIntersectionLine[0], leftIntersectionLine[1], rightIntersectionLine[0], rightIntersectionLine[1]);
+  const middle = stars[2];
+  const polaris = { x: rect.width * .49, y: rect.height * .84, name: "北極星" };
   stars.slice(0, -1).forEach((star, index) => drawLine(c, star, stars[index + 1]));
   stars.forEach((star, index) => drawNamedStar(c, star.x, star.y, state.polarisStep === 0 && index === 2 ? "仙后座 W" : "", "#f4f8ff", index === 2 ? 5 : 4));
   if (state.polarisStep >= 1) {
-    drawNamedStar(c, stars[2].x, stars[2].y, "中間尖角", "#f6d36b", 6);
+    c.save();
+    c.strokeStyle = "#f6d36b";
+    c.lineWidth = 2.5;
+    c.setLineDash([7, 5]);
+    c.beginPath();
+    c.moveTo(stars[0].x, stars[0].y);
+    c.lineTo(intersection.x, intersection.y);
+    c.lineTo(stars[4].x, stars[4].y);
+    c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = "#f6d36b";
+    c.beginPath();
+    c.arc(intersection.x, intersection.y, 5, 0, Math.PI * 2);
+    c.fill();
+    c.font = "800 13px 'Microsoft JhengHei', sans-serif";
+    c.fillText("兩側延長交會點", intersection.x + 10, intersection.y + 4);
+    c.restore();
   }
   if (state.polarisStep >= 2) {
     c.save();
@@ -759,22 +793,42 @@ function drawCassiopeiaMethod(c, rect) {
     c.lineWidth = 3;
     c.setLineDash([8, 6]);
     c.beginPath();
-    c.moveTo(stars[2].x, stars[2].y);
+    c.moveTo(intersection.x, intersection.y);
+    c.lineTo(middle.x, middle.y);
     c.lineTo(polaris.x, polaris.y);
     c.stroke();
     c.setLineDash([]);
+    drawNamedStar(c, middle.x, middle.y, "中間星", "#f6d36b", 6);
     c.fillStyle = "#f6d36b";
-    c.beginPath();
-    c.moveTo(polaris.x, polaris.y);
-    c.lineTo(polaris.x - 7, polaris.y - 17);
-    c.lineTo(polaris.x + 10, polaris.y - 12);
-    c.closePath();
-    c.fill();
+    c.font = "800 14px 'Microsoft JhengHei', sans-serif";
+    c.fillText("交會點 → 中間星，再延長", rect.width * .44, rect.height * .66);
     c.restore();
   }
   if (state.polarisStep >= 3) {
     drawNamedStar(c, polaris.x, polaris.y, polaris.name, "#f6d36b", 5);
   }
+}
+
+function drawDistanceMarks(c, start, end, count) {
+  c.save();
+  c.fillStyle = "rgba(246, 211, 107, .9)";
+  for (let i = 1; i <= count; i++) {
+    const t = i / count;
+    const x = start.x + (end.x - start.x) * t;
+    const y = start.y + (end.y - start.y) * t;
+    c.beginPath();
+    c.arc(x, y, 2.2, 0, Math.PI * 2);
+    c.fill();
+  }
+  c.restore();
+}
+
+function lineIntersection(a, b, c, d) {
+  const denominator = (a.x - b.x) * (c.y - d.y) - (a.y - b.y) * (c.x - d.x);
+  if (Math.abs(denominator) < 0.0001) return { x: (b.x + c.x) / 2, y: (b.y + c.y) / 2 };
+  const x = ((a.x * b.y - a.y * b.x) * (c.x - d.x) - (a.x - b.x) * (c.x * d.y - c.y * d.x)) / denominator;
+  const y = ((a.x * b.y - a.y * b.x) * (c.y - d.y) - (a.y - b.y) * (c.x * d.y - c.y * d.x)) / denominator;
+  return { x, y };
 }
 
 function updatePolarisStep() {
@@ -783,10 +837,35 @@ function updatePolarisStep() {
   polarisStepText.textContent = steps[state.polarisStep];
   polarisPrevButton.disabled = state.polarisStep === 0;
   polarisNextButton.disabled = state.polarisStep === steps.length - 1;
+  polarisAutoButton.textContent = polarisAutoTimer ? "停止演示" : "自動演示";
   document.querySelectorAll(".method-btn").forEach(button => {
     button.classList.toggle("is-active", button.dataset.method === state.polarisMethod);
   });
   drawPolarisCanvas();
+}
+
+function stopPolarisAutoDemo() {
+  if (polarisAutoTimer) {
+    window.clearInterval(polarisAutoTimer);
+    polarisAutoTimer = 0;
+    updatePolarisStep();
+  }
+}
+
+function startPolarisAutoDemo() {
+  stopPolarisAutoDemo();
+  state.polarisStep = 0;
+  updatePolarisStep();
+  polarisAutoTimer = window.setInterval(() => {
+    const maxStep = polarisSteps[state.polarisMethod].length - 1;
+    if (state.polarisStep >= maxStep) {
+      stopPolarisAutoDemo();
+      return;
+    }
+    state.polarisStep += 1;
+    updatePolarisStep();
+  }, 1200);
+  updatePolarisStep();
 }
 
 function updateSeasonGuide(seasonId) {
@@ -886,6 +965,7 @@ document.querySelector("#show-polaris-from-methods").addEventListener("click", s
 
 document.querySelectorAll(".method-btn").forEach(button => {
   button.addEventListener("click", () => {
+    stopPolarisAutoDemo();
     state.polarisMethod = button.dataset.method;
     state.polarisStep = 0;
     updatePolarisStep();
@@ -893,13 +973,29 @@ document.querySelectorAll(".method-btn").forEach(button => {
 });
 
 polarisPrevButton.addEventListener("click", () => {
+  stopPolarisAutoDemo();
   state.polarisStep -= 1;
   updatePolarisStep();
 });
 
 polarisNextButton.addEventListener("click", () => {
+  stopPolarisAutoDemo();
   state.polarisStep += 1;
   updatePolarisStep();
+});
+
+polarisResetButton.addEventListener("click", () => {
+  stopPolarisAutoDemo();
+  state.polarisStep = 0;
+  updatePolarisStep();
+});
+
+polarisAutoButton.addEventListener("click", () => {
+  if (polarisAutoTimer) {
+    stopPolarisAutoDemo();
+  } else {
+    startPolarisAutoDemo();
+  }
 });
 
 document.querySelector("#play-motion").addEventListener("click", () => {
