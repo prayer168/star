@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>認識星空互動教材</title>
+  <meta name="description" content="用互動星圖認識季節星座、星等、方位、光害與真實觀星線索。">
+  <link rel="stylesheet" href="styles.css?v=20260614b">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#sky-stage" aria-label="回到星空互動區">
+      <span class="brand-mark" aria-hidden="true">*</span>
+      <span>
+        <strong>認識星空</strong>
+        <small>季節星座與夜空觀察</small>
+      </span>
+    </a>
+    <nav class="nav-tabs" aria-label="教材區塊">
+      <button class="nav-tab is-active" type="button" data-target="explore">星圖</button>
+      <button class="nav-tab" type="button" data-target="concepts">概念</button>
+      <button class="nav-tab" type="button" data-target="stories">故事</button>
+      <button class="nav-tab" type="button" data-target="quiz">測驗</button>
+    </nav>
+  </header>
+
+  <main class="app-shell">
+    <section class="workspace" id="explore" aria-labelledby="explore-title">
+      <div class="sky-panel" id="sky-stage">
+        <div class="sky-toolbar" aria-label="星圖控制">
+          <div class="segmented" role="group" aria-label="選擇季節">
+            <button class="season-btn is-active" type="button" data-season="spring">春</button>
+            <button class="season-btn" type="button" data-season="summer">夏</button>
+            <button class="season-btn" type="button" data-season="autumn">秋</button>
+            <button class="season-btn" type="button" data-season="winter">冬</button>
+          </div>
+          <button class="icon-button" id="toggle-lines" type="button" aria-pressed="true" title="顯示或隱藏星座連線">
+            <span aria-hidden="true">~</span>
+            <span class="sr-only">顯示或隱藏星座連線</span>
+          </button>
+          <button class="icon-button" id="reset-view" type="button" title="重設星圖">
+            <span aria-hidden="true">↺</span>
+            <span class="sr-only">重設星圖</span>
+          </button>
+        </div>
+
+        <canvas id="sky-canvas" width="1200" height="900" aria-label="可互動星空圖"></canvas>
+        <div class="horizon">
+          <span>西</span>
+          <span>北</span>
+          <span>東</span>
+        </div>
+      </div>
+
+      <aside class="control-panel" aria-labelledby="explore-title">
+        <div>
+          <p class="eyebrow">互動任務</p>
+          <h1 id="explore-title">用真實觀星線索找星座</h1>
+          <p class="lead">星圖會模擬星星繞北天極旋轉、接近地平線變暗、光害讓暗星消失。這是教學模型，不是精密星曆。</p>
+        </div>
+
+        <div class="control-group">
+          <label for="time-range">觀察時間</label>
+          <input id="time-range" type="range" min="-3" max="3" step="0.25" value="0">
+          <div class="scale-labels" aria-hidden="true">
+            <span>傍晚</span>
+            <span>午夜</span>
+            <span>清晨</span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="light-range">光害程度</label>
+          <input id="light-range" type="range" min="0" max="4" step="1" value="1">
+          <div class="scale-labels" aria-hidden="true">
+            <span>郊外</span>
+            <span>市區</span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="magnitude-range">顯示到第幾星等</label>
+          <input id="magnitude-range" type="range" min="1" max="6" step="1" value="5">
+          <div class="scale-labels" aria-hidden="true">
+            <span>亮星</span>
+            <span>暗星</span>
+          </div>
+        </div>
+
+        <div class="control-group compact-row">
+          <label>
+            <input id="animate-sky" type="checkbox">
+            播放一晚中的星空移動
+          </label>
+        </div>
+
+        <div class="constellation-list" aria-label="星座清單" id="constellation-list"></div>
+
+        <article class="info-box" id="info-box" aria-live="polite">
+          <h2>從春季星空開始</h2>
+          <p>先找北斗七星，再沿著斗柄弧線找到大角星與角宿一。注意星座形狀會隨時間繞北方旋轉。</p>
+        </article>
+      </aside>
+    </section>
+
+    <section class="workspace is-hidden" id="concepts" aria-labelledby="concept-title">
+      <div class="concept-grid">
+        <article class="concept-card">
+          <h2 id="concept-title">一晚中的星空如何移動？</h2>
+          <p>北半球面向北方時，多數星星看起來會繞著北極星附近轉動；這是地球自轉造成的視運動。</p>
+          <canvas class="mini-canvas" id="trail-canvas" width="520" height="220" aria-label="星軌動畫示意"></canvas>
+          <button class="text-button" id="play-motion" type="button">在主星圖播放旋轉</button>
+        </article>
+        <article class="concept-card">
+          <h2>星星為什麼會閃爍？</h2>
+          <p>恆星很遠，光點很小。星光穿過擾動的大氣時會微微偏折，所以亮度看起來忽明忽暗。</p>
+          <div class="twinkle-demo" aria-label="星星閃爍示意">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+        <article class="concept-card">
+          <h2>靠近地平線為什麼較暗？</h2>
+          <p>星光在低空要穿過更厚的大氣，會被散射與吸收，所以低空星星通常較暗、顏色也較不穩定。</p>
+          <canvas class="mini-canvas" id="atmosphere-canvas" width="520" height="220" aria-label="大氣消光示意"></canvas>
+          <button class="text-button" id="show-polaris" type="button">在星圖標出北極星附近</button>
+        </article>
+        <article class="concept-card">
+          <h2>星座線是真實存在的嗎？</h2>
+          <p>星座線是辨認天空的工具。星星看起來靠近，不代表它們在宇宙中真的彼此接近。</p>
+          <div class="depth-demo" aria-label="星座投影示意">
+            <span style="--x: 14%; --y: 68%; --s: 13px"></span>
+            <span style="--x: 38%; --y: 30%; --s: 9px"></span>
+            <span style="--x: 62%; --y: 55%; --s: 16px"></span>
+            <span style="--x: 82%; --y: 22%; --s: 7px"></span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace is-hidden" id="stories" aria-labelledby="stories-title">
+      <div class="story-panel">
+        <div class="story-intro">
+          <p class="eyebrow">星星的故事</p>
+          <h1 id="stories-title">用故事記住夜空線索</h1>
+          <p class="lead">以下故事結合文化傳說與科學觀察。傳說幫助記憶星座位置；科學線索幫助學生回到真實夜空辨認。</p>
+        </div>
+        <div class="story-grid" aria-label="星星故事列表">
+          <article class="story-card">
+            <span class="story-tag">春季</span>
+            <h2>北斗七星：夜空中的指路斗杓</h2>
+            <p>古人把七顆亮星想像成一把斗杓，用來辨認方向與季節。斗口兩顆星連線延長，可以協助尋找北極星附近。</p>
+            <p class="science-note">觀察線索：北斗七星屬於大熊座的一部分，會繞北天極附近轉動。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">北方</span>
+            <h2>北極星：看似不動的方向標</h2>
+            <p>旅人常用北極星判斷北方，因為它位在接近北天極的位置，看起來不像其他星星那樣繞大圈移動。</p>
+            <p class="science-note">觀察線索：北極星不是最亮的星，但位置穩定，是找方向的重要參考。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">夏季</span>
+            <h2>織女星與牛郎星：隔著銀河相望</h2>
+            <p>七夕故事中，織女與牛郎隔著銀河相望。夜空裡，織女星、牛郎星和天津四組成醒目的夏季大三角。</p>
+            <p class="science-note">觀察線索：織女星偏藍白且很亮，牛郎星兩側有較暗的伴星。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">夏季</span>
+            <h2>天津四：天鵝飛過銀河</h2>
+            <p>天鵝座常被想像成飛翔的鳥，天津四位在天鵝尾端。十字形骨架讓它成為夏季很容易辨認的星座。</p>
+            <p class="science-note">觀察線索：在暗夜中，天鵝座附近常可看到銀河淡淡穿過。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">秋季</span>
+            <h2>仙后座：天空中的 W</h2>
+            <p>仙后座在西方神話中是一位王后。學生不必先記完整神話，只要先記住它像 W 或 M，就能在秋冬夜空找到它。</p>
+            <p class="science-note">觀察線索：仙后座與北斗七星都可用來協助尋找北極星附近。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">秋季</span>
+            <h2>飛馬座四邊形：秋夜的大方框</h2>
+            <p>飛馬座來自希臘神話中的飛馬。秋季觀星時，可先找天空中的大方框，再從方框延伸到仙女座。</p>
+            <p class="science-note">觀察線索：飛馬座四邊形是秋季尋找其他星座的起點。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">深空</span>
+            <h2>仙女座星系：肉眼可見的遠方島宇宙</h2>
+            <p>仙女座的故事來自公主被拯救的神話；在它附近，暗夜裡還可能看到一小團模糊光斑，那是仙女座星系。</p>
+            <p class="science-note">觀察線索：它不是單顆星，而是由大量恆星組成的星系；市區光害下很難看見。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">冬季</span>
+            <h2>獵戶座：冬夜最醒目的獵人</h2>
+            <p>獵戶座常被想像成拿著盾與棒的獵人。三顆腰帶星排成一直線，是冬季夜空很好的辨認起點。</p>
+            <p class="science-note">觀察線索：參宿四偏紅，參宿七偏藍白，可讓學生練習觀察星色。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">冬季</span>
+            <h2>天狼星：大犬座的明亮眼睛</h2>
+            <p>天狼星位在大犬座，是夜空中最亮的恆星。從獵戶座腰帶往東南方向延伸，常可找到它。</p>
+            <p class="science-note">觀察線索：天狼星低空時常閃爍明顯，這主要來自大氣擾動。</p>
+          </article>
+          <article class="story-card">
+            <span class="story-tag">星團</span>
+            <h2>昴宿星團：一小群擠在一起的亮點</h2>
+            <p>昴宿星團在許多文化中都有故事，有人把它想成一群姊妹，也有人把它當成季節農事的提醒。</p>
+            <p class="science-note">觀察線索：它是真實的疏散星團；暗夜中可看到多顆小星，光害強時細節會變少。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace is-hidden" id="quiz" aria-labelledby="quiz-title">
+      <div class="quiz-panel">
+        <div>
+          <p class="eyebrow">形成性評量</p>
+          <h1 id="quiz-title">真實觀星判斷挑戰</h1>
+          <p class="lead">完成 10 題任務，檢查自己是否能用方位、季節、亮度、光害與星空運動判斷夜空。</p>
+        </div>
+        <div id="quiz-card" class="quiz-card" aria-live="polite"></div>
+      </div>
+      <div class="teacher-panel">
+        <h2>教師提示</h2>
+        <ul>
+          <li>先暫停動畫，讓學生描述星座形狀，再播放「一晚中的星空移動」。</li>
+          <li>調高光害前，請學生預測第 4 到第 6 星等的星會發生什麼事。</li>
+          <li>本教材修正為更接近真實觀星的概念模型，但仍不對應特定日期、時間與所在地的精密星空。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js?v=20260614b"></script>
+</body>
+</html>
