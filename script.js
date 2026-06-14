@@ -35,7 +35,7 @@ const polarisSteps = {
   cassiopeia: [
     "第 1 步：先找到像 W 或 M 的仙后座。",
     "第 2 步：將 W 兩側邊向後延伸，找出兩線的交會點。",
-    "第 3 步：把交會點與 W 中間星連成一線，沿中間星方向延長約 5 倍。",
+    "第 3 步：從交會點往 W 中間星方向延伸，總長約為交會點到中間星距離的 5 倍。",
     "第 4 步：延長線附近那顆位置穩定的星，就是北極星。"
   ]
 };
@@ -755,19 +755,19 @@ function drawDipperMethod(c, rect) {
 
 function drawCassiopeiaMethod(c, rect) {
   const stars = [
-    { x: rect.width * .20, y: rect.height * .55, name: "仙后一" },
-    { x: rect.width * .36, y: rect.height * .46, name: "仙后二" },
-    { x: rect.width * .52, y: rect.height * .46, name: "中間星" },
-    { x: rect.width * .64, y: rect.height * .46, name: "仙后四" },
-    { x: rect.width * .80, y: rect.height * .55, name: "仙后五" }
+    { x: rect.width * .18, y: rect.height * .56, name: "仙后一" },
+    { x: rect.width * .34, y: rect.height * .46, name: "仙后二" },
+    { x: rect.width * .50, y: rect.height * .46, name: "中間星" },
+    { x: rect.width * .66, y: rect.height * .46, name: "仙后四" },
+    { x: rect.width * .82, y: rect.height * .56, name: "仙后五" }
   ];
   const leftIntersectionLine = [stars[0], stars[1]];
   const rightIntersectionLine = [stars[4], stars[3]];
   const intersection = lineIntersection(leftIntersectionLine[0], leftIntersectionLine[1], rightIntersectionLine[0], rightIntersectionLine[1]);
   const middle = stars[2];
   const polaris = {
-    x: middle.x + (middle.x - intersection.x) * 5,
-    y: middle.y + (middle.y - intersection.y) * 5,
+    x: intersection.x + (middle.x - intersection.x) * 5,
+    y: intersection.y + (middle.y - intersection.y) * 5,
     name: "北極星"
   };
   stars.slice(0, -1).forEach((star, index) => drawLine(c, star, stars[index + 1]));
@@ -801,11 +801,11 @@ function drawCassiopeiaMethod(c, rect) {
     c.lineTo(polaris.x, polaris.y);
     c.stroke();
     c.setLineDash([]);
-    drawDistanceMarks(c, middle, polaris, 5);
+    drawDistanceMarks(c, intersection, polaris, 5);
     drawNamedStar(c, middle.x, middle.y, "中間星", "#f6d36b", 6);
     c.fillStyle = "#f6d36b";
     c.font = "800 14px 'Microsoft JhengHei', sans-serif";
-    c.fillText("交會點 → 中間星，再延長 5 倍", rect.width * .42, rect.height * .69);
+    c.fillText("交會點 → 中間星方向，總長 5 倍", rect.width * .40, rect.height * .65);
     c.restore();
   }
   if (state.polarisStep >= 3) {
