@@ -14,6 +14,10 @@
 
 ## 使用方式
 
+線上版：
+
+`https://prayer168.github.io/star/`
+
 直接開啟 `index.html`，或在本資料夾啟動本機伺服器：
 
 ```powershell
