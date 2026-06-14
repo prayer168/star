@@ -503,12 +503,13 @@ input[type="range"] {
   background: var(--blue);
 }
 
-#concepts, #stories, #quiz {
+#concepts, #seasons, #polaris, #stories, #quiz {
   background: #eef2f5;
   display: block;
 }
-#concepts.is-hidden, #stories.is-hidden, #quiz.is-hidden { display: none; }
+#concepts.is-hidden, #seasons.is-hidden, #polaris.is-hidden, #stories.is-hidden, #quiz.is-hidden { display: none; }
 
+.lesson-panel,
 .story-panel {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
