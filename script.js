@@ -686,11 +686,14 @@ resetButton.addEventListener("click", () => {
 
 canvas.addEventListener("click", (event) => hitTest(event.clientX, event.clientY));
 
-document.querySelector("#show-polaris").addEventListener("click", () => {
+function showPolarisOnSky() {
   state.showPolaris = true;
   document.querySelector('[data-target="explore"]').click();
   drawSky();
-});
+}
+
+document.querySelector("#show-polaris").addEventListener("click", showPolarisOnSky);
+document.querySelector("#show-polaris-from-methods").addEventListener("click", showPolarisOnSky);
 
 document.querySelector("#play-motion").addEventListener("click", () => {
   document.querySelector('[data-target="explore"]').click();

@@ -291,6 +291,71 @@ input[type="range"] {
   padding: 20px;
   min-height: 220px;
 }
+.wide-card {
+  grid-column: 1 / -1;
+}
+.season-guide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.season-guide div {
+  min-height: 150px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+}
+.season-guide strong,
+.season-guide span,
+.season-guide small {
+  display: block;
+}
+.season-guide strong {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  color: #101725;
+  background: #f6d36b;
+  font-size: 20px;
+}
+.season-guide span {
+  margin-bottom: 8px;
+  font-weight: 900;
+}
+.season-guide small {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.polaris-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.polaris-methods section {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.polaris-methods h3 {
+  margin: 0 0 10px;
+  color: #123f52;
+  font-size: 18px;
+}
+.polaris-methods ol {
+  margin: 0;
+  padding-left: 22px;
+}
+.polaris-methods li {
+  margin-bottom: 7px;
+}
 .mini-canvas {
   width: 100%;
   height: 180px;
@@ -557,6 +622,6 @@ button:focus-visible, input:focus-visible {
   }
   .season-btn { min-width: 0; flex: 1; }
   .icon-button { flex: 0 0 42px; }
-  .constellation-list, .concept-grid, .story-grid { grid-template-columns: 1fr; }
+  .constellation-list, .concept-grid, .story-grid, .season-guide, .polaris-methods { grid-template-columns: 1fr; }
   h1 { font-size: 25px; }
 }
